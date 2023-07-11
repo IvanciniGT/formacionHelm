@@ -99,3 +99,20 @@ Bases de datos:
 - Replicacion   ->
 - Cluster       -> Varios pods... Y cada pod, quiero que tenga sus propios ficheros de datos        
                    Su propio volumen de almacenamiento
+---
+                                     (requirements)
+                    REALES            GARANTIZADO           USO         LIBRE REAL          SIN COMPROMETER
+                Cores       Ram     Cores       RAM     Cores   RAM     Cores   RAM         Cores       RAM
+Nodo 1           4          16       3           8        1      2       3      14           1          8
+    Pod mariadb                      3           8        1      2
+
+Nodo 2           4          16       4           16       2      8      0      0            0          0
+    Pod nginx (restart)              2           8        0      0      más lenta
+    Pod 2 nginx                      2           8        2      8
+                                                          (limits)
+
+
+Pod. 
+    mariab: Quiero que me garanticen 3 cores y 8 Gbs de RAM
+    nginx:  Quiero que me garanticen 2 cores y 8 Gbs de RAM
+

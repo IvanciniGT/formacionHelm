@@ -1,3 +1,58 @@
+kind:           PersistentVolume
+apiVersion:     v1
+metadata:
+    name:       volumen-mariadb
+spec:
+    capacity: 
+        storage: 1Gi
+    storageClassName: rapidito-redundante # Tipo de volumen
+    accessModes: # Esto va condicionado, no solo por lo que yo necesite... si no por lo que el volumen real permita
+        - ReadWriteOnce # Quiero un volumen para mi, que una vez montado en un host, no se entregue a otro host
+                        # Aunque dentro de ese host, lo podría usar en multiples pods
+        - ReadWriteMany # Quiero un volumen que pueda ser usado por múltiples pods, en múltiples hosts
+        - ReadOnlyMany  # Quiero un volumen que pueda ser usado EN SOLO LECTURA por múltiples pods, en múltiples hosts
+        - ReadWriteOncePod # Quiero un volumen para mi, que una vez montado en un host, no se entregue a otro host
+                           # Y dentro de ese host, solo pueda usarse en un pods
+    hostPath:
+        path: /home/ubuntu/environment/datos/mariadb # En el host
+        type: DirectoryOrCreate
+---
+kind:           PersistentVolumeClaim
+apiVersion:     v1
+metadata:
+    name:       peticion-volumen-mariadb
+spec:
+    resources:
+        requests:
+            storage: 1Gi
+    storageClassName: rapidito-redundante # Tipo de volumen
+    accessModes: # Esto va condicionado, no solo por lo que yo necesite... si no por lo que el volumen real permita
+        #- ReadWriteOnce # Quiero un volumen para mi, que una vez montado en un host, no se entregue a otro host
+                        # Aunque dentro de ese host, lo podría usar en multiples pods
+        #- ReadWriteMany # Quiero un volumen que pueda ser usado por múltiples pods, en múltiples hosts
+        #- ReadOnlyMany  # Quiero un volumen que pueda ser usado EN SOLO LECTURA por múltiples pods, en múltiples hosts
+        - ReadWriteOncePod # Quiero un volumen para mi, que una vez montado en un host, no se entregue a otro host
+                           # Y dentro de ese host, solo pueda usarse en un pods
+---
+kind:           ConfigMap
+apiVersion:     v1
+metadata:
+    name:       configuracion-mariadb
+
+data:
+    nombre_bbdd:    curso
+---
+kind:           Secret
+apiVersion:     v1
+metadata:
+    name:       configuracion-mariadb-secreta
+
+data:
+    contraseña-root:        cGFzc3dvcmQ= # Ponemos los valores en base64
+    contraseña-usuario:     cGFzc3dvcmQ= # La única diferencia con respecto a los 
+                                         # secret es que se guardan encriptados dentro de Kubernetes
+    usuario:                dXN1YXJpbw==
+---
 kind:           Deployment
 apiVersion:     apps/v1
 metadata:
@@ -17,15 +72,40 @@ spec:
                 -   name:   contenedor1 
                     image:  mariadb:latest 
                     imagePullPolicy: IfNotPresent
+                    # Cuanta CPU y RAM le dejo?
+                    # ESTO ES UNA MEDIDA DE GRACIA (un control de seguridad)
+                    # El sitio donde definir esto (especialmente lo relativo a Memoria RAM) es el proceso que corro
+                    # Eso lo quiero definir en la propia BBDD.. Que tendrá su fichero de configuración
+                    resources:
+                        requests: # Esto se usa por el planificador en primera instancia. Para determinar a qué máquina se asigna el pod (scheduler)
+                                  # Esto realmente limita el uso de la memoria y cpu? Podría en según que caso
+                            cpu:    500m
+                            memory: 1Gi
+                        limits:   # Limite real de uso de recursos en caso de que haya disponible
+                            cpu:    8   # No significa que al proceso de la BBDD le asigno 1 core de la máquina
+                                        # Le dejo que use el equivalente a 1 core por unidad de tiempo.
+                            memory: 1Gi # El mismo que arriba.. Si tomo más y luego otro la necesita, me matan.
                     env:
                         -   name:   MARIADB_ROOT_PASSWORD
-                            value:  password
+                            valueFrom:  
+                                secretKeyRef:    
+                                    name:   configuracion-mariadb-secret
+                                    key:    contraseña-root
                         -   name:   MARIADB_DATABASE # Configmap
-                            value:  curso
+                            valueFrom:  
+                                configMapKeyRef:    
+                                    name:   configuracion-mariadb
+                                    key:    nombre_bbdd
                         -   name:   MARIADB_USER
-                            value:  usuario     
+                            valueFrom:  
+                                secretKeyRef:    
+                                    name:   configuracion-mariadb-secret
+                                    key:    usuario     
                         -   name:   MARIADB_PASSWORD
-                            value:  password    # Secret
+                            valueFrom:  
+                                secretKeyRef:    
+                                    name:   configuracion-mariadb-secret
+                                    key:    contraseña-usuario
                     volumeMounts:
                         - name:         datos-bbdd
                           mountPath:   /var/lib/mysql
@@ -33,6 +113,4 @@ spec:
                 - name: datos-bbdd
                   # Yo, como persona que necesita desplegar una app, diré:
                   # Quiero un volumen, rapidito-redundante de 10 Gbs
-                  hostPath:
-                    path: /home/ubuntu/environment/datos/mariadb # En el host
-                    type: DirectoryOrCreate
+                  persistentVolumeClaim: peticion-volumen-mariadb
