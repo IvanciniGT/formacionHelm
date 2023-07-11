@@ -114,3 +114,5 @@ spec:
                   # Yo, como persona que necesita desplegar una app, diré:
                   # Quiero un volumen, rapidito-redundante de 10 Gbs
                   persistentVolumeClaim: peticion-volumen-mariadb
+---
+# WORDPRESS
