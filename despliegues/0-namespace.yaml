@@ -1,0 +1,6 @@
+kind:           Namespace # Tipo de objeto a configurar
+apiVersion:     v1 # Librería dentro del cluster que define ese tipo de objeto: libreriaId/version
+metadata:
+    name:       ivan
+
+#spec:

@@ -1,0 +1,12 @@
+kind:           Pod
+apiVersion:     v1
+metadata:
+    name:       pod-ivan
+    #namespace:  ivan       #No lo usamos... queremos flexibilidad
+    labels:
+        app:    nginx
+spec:
+    containers:
+        -   name:   contenedor1 
+            image:  nginx:latest # nginx:1.21.3
+            imagePullPolicy: IfNotPresent

@@ -1,0 +1,38 @@
+kind:           Deployment
+apiVersion:     apps/v1
+metadata:
+    name:       deployment-bbdd
+
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app:    mariadb
+    template:
+        metadata:
+            labels:
+                app:    mariadb
+        spec:
+            containers:
+                -   name:   contenedor1 
+                    image:  mariadb:latest 
+                    imagePullPolicy: IfNotPresent
+                    env:
+                        -   name:   MARIADB_ROOT_PASSWORD
+                            value:  password
+                        -   name:   MARIADB_DATABASE # Configmap
+                            value:  curso
+                        -   name:   MARIADB_USER
+                            value:  usuario     
+                        -   name:   MARIADB_PASSWORD
+                            value:  password    # Secret
+                    volumeMounts:
+                        - name:         datos-bbdd
+                          mountPath:   /var/lib/mysql
+            volumes:
+                - name: datos-bbdd
+                  # Yo, como persona que necesita desplegar una app, diré:
+                  # Quiero un volumen, rapidito-redundante de 10 Gbs
+                  hostPath:
+                    path: /home/ubuntu/environment/datos/mariadb # En el host
+                    type: DirectoryOrCreate

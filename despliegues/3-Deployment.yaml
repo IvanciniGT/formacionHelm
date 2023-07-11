@@ -1,0 +1,19 @@
+kind:           Deployment
+apiVersion:     apps/v1
+metadata:
+    name:       deployment-ivan
+
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app:    nginx
+    template:
+        metadata:
+            labels:
+                app:    nginx
+        spec:
+            containers:
+                -   name:   contenedor1 
+                    image:  nginx:latest # nginx:1.21.3
+                    imagePullPolicy: IfNotPresent

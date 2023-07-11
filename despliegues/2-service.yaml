@@ -1,0 +1,12 @@
+kind:           Service # Tipo de objeto a configurar
+apiVersion:     v1 # Librería dentro del cluster que define ese tipo de objeto: libreriaId/version
+metadata:
+    name:       web-servicio # Nombre que se da de alta en el dns de kubernetes
+
+spec:
+    type: ClusterIP
+    ports:
+        - port:        81     # Puerto que se abre en la IP de balanceo
+          targetPort:  80     # Puerto que está abierto en los contenedores que prestan ese servicio
+    selector:
+        app:    nginx
