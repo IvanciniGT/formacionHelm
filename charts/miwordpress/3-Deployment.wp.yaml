@@ -1,3 +1,6 @@
+---
+# Me temo que os comenté que esto no es responsabilidad nuestra !
+# Y además, en el 99% de los casos (como es el vuestro en ITNOW) existirá un provisionador de volumenes automatizado.
 kind:           PersistentVolume
 apiVersion:     v1
 metadata:
@@ -17,22 +20,31 @@ spec:
         path: /home/ubuntu/environment/datos/mariadb # En el host
         type: DirectoryOrCreate
 ---
+# Voy a querer generar una PVC? DEPENDE !
+# De qué depende? De si no hay ya una pvc previa que debo reutilizar
+# En general no nos gusta que HELM genere las pvcs... 
+# Eso nos puede dar problemas: 
+# Si instalo una app con helm... y helm crea la pvc
+# Cuando desinstale la app... que va a pasar? Que helm va a borrar la pvc. Y eso puede no interesarme
+# En que entorno voy a desplegar:
+# Pruebas Integración: no voy a querer persistencia directamente!
 kind:           PersistentVolumeClaim
 apiVersion:     v1
 metadata:
-    name:       peticion-volumen-mariadb
+    name:       peticion-volumen-mariadb    ## PARAM
 spec:
     resources:
         requests:
-            storage: 1Gi
-    storageClassName: rapidito-redundante # Tipo de volumen
+            storage: 1Gi ## PARAM
+    # El hecho de si quiero fijar un tipo o ni siquiera
+    storageClassName: rapidito-redundante # Tipo de volumen PARAM
     accessModes: # Esto va condicionado, no solo por lo que yo necesite... si no por lo que el volumen real permita
         #- ReadWriteOnce # Quiero un volumen para mi, que una vez montado en un host, no se entregue a otro host
                         # Aunque dentro de ese host, lo podría usar en multiples pods
         #- ReadWriteMany # Quiero un volumen que pueda ser usado por múltiples pods, en múltiples hosts
         #- ReadOnlyMany  # Quiero un volumen que pueda ser usado EN SOLO LECTURA por múltiples pods, en múltiples hosts
         - ReadWriteOncePod # Quiero un volumen para mi, que una vez montado en un host, no se entregue a otro host
-                           # Y dentro de ese host, solo pueda usarse en un pods
+                           # Y dentro de ese host, solo pueda usarse en un pods # PARAM
 ---
 kind:           ConfigMap
 apiVersion:     v1
@@ -40,8 +52,11 @@ metadata:
     name:       configuracion-mariadb
 
 data:
-    nombre_bbdd:    curso
+    nombre_bbdd:    curso   # PARAM
 ---
+## Me pasa un poco como el PV / PVC... Tener estos datos aqui me puede ser un problema...
+# 1º No están encriptados.
+# Muchas veces los secrets los generamos de forma independiente -> JENKINS que guarda los secrets encriptados (y que de hecho los genera autom)
 kind:           Secret
 apiVersion:     v1
 metadata:
@@ -56,13 +71,13 @@ data:
 kind:           Service
 apiVersion:     v1
 metadata:
-    name:       servicio-bbdd
+    name:       servicio-bbdd # PARAM
 
 spec:
     type:       ClusterIP
     ports:
-        - port: 3306
-          targetPort: 3306
+        - port: 3306                # NO PARAM
+          targetPort: 3306          # NO PARAM
     selector:
         app:    mariadb
 ---
@@ -160,9 +175,9 @@ spec:
     accessModes: # Esto va condicionado, no solo por lo que yo necesite... si no por lo que el volumen real permita
         #- ReadWriteOnce # Quiero un volumen para mi, que una vez montado en un host, no se entregue a otro host
                         # Aunque dentro de ese host, lo podría usar en multiples pods
-        #- ReadWriteMany # Quiero un volumen que pueda ser usado por múltiples pods, en múltiples hosts
+        - ReadWriteMany # Quiero un volumen que pueda ser usado por múltiples pods, en múltiples hosts
         #- ReadOnlyMany  # Quiero un volumen que pueda ser usado EN SOLO LECTURA por múltiples pods, en múltiples hosts
-        - ReadWriteOncePod # Quiero un volumen para mi, que una vez montado en un host, no se entregue a otro host
+        #- ReadWriteOncePod # Quiero un volumen para mi, que una vez montado en un host, no se entregue a otro host
                            # Y dentro de ese host, solo pueda usarse en un pods
 ---
 kind:           Service
