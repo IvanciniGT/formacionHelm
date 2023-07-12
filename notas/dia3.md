@@ -23,3 +23,11 @@ Para las afinidades tenemos 3 etiquetas:
 - nodeName          Como si no existiera
 - nodeSelector      Me da afinidades con nodos... de forma básica (pocas opciones)
 - affinity          Me permite de todo !!! EL BUENO !
+
+# HELM 
+
+Un chart de HELM es una plantilla de despliegue personalizable de una aplicación.
+
+
+$ helm pull --untar oci://registry-1.docker.io/bitnamicharts/mariadb
+        
