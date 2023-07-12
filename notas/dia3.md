@@ -61,3 +61,8 @@ Vamos a usar una sintaxis... como si fueran carpetas de un filesystem. Solo que 
 El punto inicial representa el origen de datos de nuestro chart de helm (LA RAIZ)
 Y es como si dentro tuviera esas carpetas... 
 
+ESTO NO CUELA: condicion1 and condicion2
+
+and condicion1 condicion2
+
+or

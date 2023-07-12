@@ -12,8 +12,8 @@ wordpress:
         cpu:  1
         memory: 1Gi 
   persistence:
-    enabled: false
-    existing-pvc-name: 
+    enabled: true
+    existing-pvc-name: ~
     capacity: ~
     storageClass: ~
   ingress:
