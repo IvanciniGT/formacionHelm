@@ -53,6 +53,19 @@ data:
                                          # secret es que se guardan encriptados dentro de Kubernetes
     usuario:                dXN1YXJpbw==
 ---
+kind:           Service
+apiVersion:     v1
+metadata:
+    name:       servicio-bbdd
+
+spec:
+    type:       ClusterIP
+    ports:
+        - port: 3306
+          targetPort: 3306
+    selector:
+        app:    mariadb
+---
 kind:           Deployment
 apiVersion:     apps/v1
 metadata:
@@ -116,3 +129,111 @@ spec:
                   persistentVolumeClaim: peticion-volumen-mariadb
 ---
 # WORDPRESS
+kind:           PersistentVolume
+apiVersion:     v1
+metadata:
+    name:       volumen-wordpress
+spec:
+    capacity: 
+        storage: 1Gi
+    storageClassName: rapidito-redundante # Tipo de volumen
+    accessModes: # Esto va condicionado, no solo por lo que yo necesite... si no por lo que el volumen real permita
+        - ReadWriteOnce # Quiero un volumen para mi, que una vez montado en un host, no se entregue a otro host
+                        # Aunque dentro de ese host, lo podría usar en multiples pods
+        - ReadWriteMany # Quiero un volumen que pueda ser usado por múltiples pods, en múltiples hosts
+        - ReadOnlyMany  # Quiero un volumen que pueda ser usado EN SOLO LECTURA por múltiples pods, en múltiples hosts
+        - ReadWriteOncePod # Quiero un volumen para mi, que una vez montado en un host, no se entregue a otro host
+                           # Y dentro de ese host, solo pueda usarse en un pods
+    hostPath:
+        path: /home/ubuntu/environment/datos/wordpress # En el host
+        type: DirectoryOrCreate
+---
+kind:           PersistentVolumeClaim
+apiVersion:     v1
+metadata:
+    name:       peticion-volumen-wordpress
+spec:
+    resources:
+        requests:
+            storage: 1Gi
+    storageClassName: rapidito-redundante # Tipo de volumen
+    accessModes: # Esto va condicionado, no solo por lo que yo necesite... si no por lo que el volumen real permita
+        #- ReadWriteOnce # Quiero un volumen para mi, que una vez montado en un host, no se entregue a otro host
+                        # Aunque dentro de ese host, lo podría usar en multiples pods
+        #- ReadWriteMany # Quiero un volumen que pueda ser usado por múltiples pods, en múltiples hosts
+        #- ReadOnlyMany  # Quiero un volumen que pueda ser usado EN SOLO LECTURA por múltiples pods, en múltiples hosts
+        - ReadWriteOncePod # Quiero un volumen para mi, que una vez montado en un host, no se entregue a otro host
+                           # Y dentro de ese host, solo pueda usarse en un pods
+---
+kind:           Service
+apiVersion:     v1
+metadata:
+    name:       servicio-wordpress
+
+spec:
+    type:       ClusterIP # NodePort # LoadBalancer #+Ingress
+    ports:
+        - port: 80
+          targetPort: 80
+    selector:
+        app:    wordpress
+---
+kind:           Deployment
+apiVersion:     apps/v1
+metadata:
+    name:       deployment-wordpress
+
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app:    wordpress
+    template:
+        metadata:
+            labels:
+                app:    wordpress
+        spec:
+            containers:
+                -   name:   contenedor1 
+                    image:  wordpress:latest 
+                    imagePullPolicy: IfNotPresent
+                    # Cuanta CPU y RAM le dejo?
+                    # ESTO ES UNA MEDIDA DE GRACIA (un control de seguridad)
+                    # El sitio donde definir esto (especialmente lo relativo a Memoria RAM) es el proceso que corro
+                    # Eso lo quiero definir en la propia BBDD.. Que tendrá su fichero de configuración
+                    resources:
+                        requests: # Esto se usa por el planificador en primera instancia. Para determinar a qué máquina se asigna el pod (scheduler)
+                                  # Esto realmente limita el uso de la memoria y cpu? Podría en según que caso
+                            cpu:    500m
+                            memory: 1Gi
+                        limits:   # Limite real de uso de recursos en caso de que haya disponible
+                            cpu:    8   # No significa que al proceso de la BBDD le asigno 1 core de la máquina
+                                        # Le dejo que use el equivalente a 1 core por unidad de tiempo.
+                            memory: 1Gi # El mismo que arriba.. Si tomo más y luego otro la necesita, me matan.
+                    env:
+                        -   name:   WORDPRESS_DB_HOST
+                            value:    servicio-bbdd:3306
+                        -   name:   WORDPRESS_DB_NAME # Configmap
+                            valueFrom:  
+                                configMapKeyRef:    
+                                    name:   configuracion-mariadb
+                                    key:    nombre_bbdd
+                        -   name:   WORDPRESS_DB_USER
+                            valueFrom:  
+                                secretKeyRef:    
+                                    name:   configuracion-mariadb-secret
+                                    key:    usuario     
+                        -   name:   WORDPRESS_DB_PASSWORD
+                            valueFrom:  
+                                secretKeyRef:    
+                                    name:   configuracion-mariadb-secret
+                                    key:    contraseña-usuario
+                    volumeMounts:
+                        - name:         datos-wordpress
+                          mountPath:   /var/www/html
+            volumes:
+                - name: datos-wordpress
+                  # Yo, como persona que necesita desplegar una app, diré:
+                  # Quiero un volumen, rapidito-redundante de 10 Gbs
+                  persistentVolumeClaim: peticion-volumen-wordpress
+---
