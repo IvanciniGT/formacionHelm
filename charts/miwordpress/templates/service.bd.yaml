@@ -1,0 +1,13 @@
+---
+kind:           Service
+apiVersion:     v1
+metadata:
+    name:       {{ default "wp-db" .Values.mariadb.serviceName | trim | quote }}
+
+spec:
+    type:       ClusterIP
+    ports:
+        - port: 3306
+          targetPort: 3306
+    selector:
+        app:    mariadb

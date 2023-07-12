@@ -1,0 +1,12 @@
+---
+{{ if .Values.mariadb.config.customConfigFile }}
+kind:           ConfigMap
+apiVersion:     v1
+metadata:
+    name:       fichero-configuracion-mariadb
+
+data:
+    mariadb.conf: |
+        {{- .Values.mariadb.config.customConfigFile | nindent 8 }}
+
+{{ end }}

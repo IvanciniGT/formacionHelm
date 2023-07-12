@@ -26,7 +26,8 @@ wordpress:
     cpu: ~
     memory: ~
   
-mariadb:  
+mariadb: 
+  serviceName: ~
   image:      
     repo: mariadb  
     tag: latest
@@ -45,8 +46,15 @@ mariadb:
     storageClass: ~
   config:
     dbName: "WORDPRESS "
-    existingSecretName: 
-    user: usuario
+    existingSecretName: ~
+    user: ~
     password: ~ # Aleatorio
     rootPassword: ~ # Aleatorio
-    customConfigFile: ~
+    customConfigFile: |
+      Esta es la linea 1 del fichero de mysql
+      Y esta es la linea 2
+      Y esta es la 3
+      
+      
+      
+      
