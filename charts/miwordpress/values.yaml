@@ -31,7 +31,7 @@ mariadb:
     image:            
         repo: mariadb    
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
     resources:
         requests: # Esto se usa por el planificador en primera instancia. Para determinar a qué máquina se asigna el pod (scheduler)
                 cpu:    1

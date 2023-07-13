@@ -15,8 +15,19 @@ spec:
         spec:
             containers:
                 -   name:   contenedor1 
-                    image:  mariadb:latest 
-                    imagePullPolicy: IfNotPresent
+                    {{ with .Values.mariadb.image -}}
+{{- /* *************************************************************************************** 
+    Aqui validamos la variable pullPolicy, a la que por defecto asignamos el valor ALWAYS
+******************************************************************************************** */ -}}                    
+{{ $pullPolicyRellena := default "Always" .pullPolicy }}
+{{- if not (regexMatch "^((IfNotPresent)|(Always)|(Never))$" $pullPolicyRellena ) }}
+    {{ fail (printf "El valor suministrador para la propiedad mariadb.image.pullpolicy: '%s' no es válido. Debe debe tener como valor: Always, IfnotPresent o Never." .pullPolicy) }}
+{{ end -}}
+
+                    image:  {{ required "Debe suministrar el repo de la imagen de mariadb: mariadb.image.repo" .repo -}}
+                            :{{ required "Debe suministrar el tag de la imagen de mariadb: mariadb.image.tag" .tag }}
+                    imagePullPolicy: {{ $pullPolicyRellena }}
+                    {{- end }}
                     resources:
                         requests: 
                             cpu:    500m
@@ -29,7 +40,7 @@ spec:
                             valueFrom:  
                                 secretKeyRef:    
                                     name:   configuracion-mariadb-secret
-                                    key:    contraseña-root
+                                    key:    contrasena-root
                         -   name:   MARIADB_DATABASE
                             valueFrom:  
                                 configMapKeyRef:    
@@ -44,10 +55,11 @@ spec:
                             valueFrom:  
                                 secretKeyRef:    
                                     name:   configuracion-mariadb-secret
-                                    key:    contraseña-usuario
+                                    key:    contrasena-usuario
                     volumeMounts:
                         - name:         datos-bbdd
                           mountPath:   /var/lib/mysql
             volumes:
                 - name: datos-bbdd
-                  persistentVolumeClaim: peticion-volumen-mariadb
+                  persistentVolumeClaim: 
+                    claimName: peticion-volumen-mariadb

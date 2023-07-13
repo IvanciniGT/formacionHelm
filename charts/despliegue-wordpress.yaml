@@ -1,0 +1,141 @@
+---
+# Source: miwordpress/templates/secret.yaml
+kind:           Secret
+apiVersion:     v1
+metadata:
+    name:       configuracion-mariadb-secreta
+
+data:
+    contrasena-root:        "RVR8XkUjLkA4WER3IzNZ"
+    contrasena-usuario:     "M0Epbjd2VV5uLCAyTFZd"
+    usuario:                "ZGJ1c2Vy"
+---
+# Source: miwordpress/templates/configmap.yaml
+kind:           ConfigMap
+apiVersion:     v1
+metadata:
+    name:       configuracion-mariadb
+
+data:
+    nombre_bbdd:    "wordpress"
+                    # Listado de filtros disponibles: https://helm.sh/docs/chart_template_guide/function_list/
+---
+# Source: miwordpress/templates/db/configmap.config.file.yaml
+kind:           ConfigMap
+apiVersion:     v1
+metadata:
+    name:       fichero-configuracion-mariadb
+
+data:
+    mariadb.conf: |
+        Esta es la linea 1 del fichero de mysql
+        Y esta es la linea 2
+        Y esta es la 3
+---
+# Source: miwordpress/templates/db/pvc.yaml
+kind:           PersistentVolumeClaim
+apiVersion:     v1
+metadata:
+    name:       peticion-volumen-mariadb
+spec:
+    resources:
+        requests:
+            storage: 1Gi
+    accessModes:
+        - ReadWriteOncePod
+---
+# Source: miwordpress/templates/wp/pvc.yaml
+kind:           PersistentVolumeClaim
+apiVersion:     v1
+metadata:
+    name:       peticion-volumen-wordpress
+spec:
+    resources:
+        requests:
+            storage: 1Gi
+    accessModes:
+        - ReadWriteOncePod
+---
+# Source: miwordpress/templates/db/service.yaml
+kind:           Service
+apiVersion:     v1
+metadata:
+    name:       "wp-db"
+
+spec:
+    type:       ClusterIP
+    ports:
+        - port: 3306
+          targetPort: 3306
+    selector:
+        app:    mariadb
+---
+# Source: miwordpress/templates/wp/service.yaml
+kind:           Service
+apiVersion:     v1
+metadata:
+    name:       servicio-wordpress
+
+spec:
+    type:       ClusterIP
+    ports:
+        - port: 80
+          targetPort: 80
+    selector:
+        app:    wordpress
+---
+# Source: miwordpress/templates/db/deployment.yaml
+kind:           Deployment
+apiVersion:     apps/v1
+metadata:
+    name:       deployment-bbdd
+
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app:    mariadb
+    template:
+        metadata:
+            labels:
+                app:    mariadb
+        spec:
+            containers:
+                -   name:   contenedor1 
+                    image:  mariadb:latest
+                    imagePullPolicy: Felipe
+                    resources:
+                        requests: 
+                            cpu:    500m
+                            memory: 1Gi
+                        limits:
+                            cpu:    8
+                            memory: 1Gi
+                    env:
+                        -   name:   MARIADB_ROOT_PASSWORD
+                            valueFrom:  
+                                secretKeyRef:    
+                                    name:   configuracion-mariadb-secret
+                                    key:    contrasena-root
+                        -   name:   MARIADB_DATABASE
+                            valueFrom:  
+                                configMapKeyRef:    
+                                    name:   configuracion-mariadb
+                                    key:    nombre_bbdd
+                        -   name:   MARIADB_USER
+                            valueFrom:  
+                                secretKeyRef:    
+                                    name:   configuracion-mariadb-secret
+                                    key:    usuario     
+                        -   name:   MARIADB_PASSWORD
+                            valueFrom:  
+                                secretKeyRef:    
+                                    name:   configuracion-mariadb-secret
+                                    key:    contrasena-usuario
+                    volumeMounts:
+                        - name:         datos-bbdd
+                          mountPath:   /var/lib/mysql
+            volumes:
+                - name: datos-bbdd
+                  persistentVolumeClaim: 
+                    claimName: peticion-volumen-mariadb
