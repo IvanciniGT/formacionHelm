@@ -11,7 +11,7 @@
 kind:           PersistentVolumeClaim
 apiVersion:     v1
 metadata:
-    name:       peticion-volumen-mariadb
+    name:       {{ include "db.pvc.name" $ }}
 spec:
     resources:
         requests:

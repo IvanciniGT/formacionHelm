@@ -46,7 +46,7 @@ mariadb:
         storageClass: ~
     config:
         dbName: "WORDPRESS "
-        existingSecretName: ~
+        existingSecretName: federico
         user: ~
         password: ~ # Aleatorio
         rootPassword: ~ # Aleatorio

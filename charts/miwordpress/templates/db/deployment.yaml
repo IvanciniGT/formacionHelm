@@ -7,11 +7,11 @@ spec:
     replicas: 1
     selector:
         matchLabels:
-            app:    mariadb
+            {{ include "db.label.app" . }}
     template:
         metadata:
             labels:
-                app:    mariadb
+                {{ include "db.label.app" . }}
         spec:
             containers:
                 -   name:   contenedor1 
@@ -39,27 +39,27 @@ spec:
                         -   name:   MARIADB_ROOT_PASSWORD
                             valueFrom:  
                                 secretKeyRef:    
-                                    name:   configuracion-mariadb-secret
+                                    name:   {{ include "secret.name" . }}
                                     key:    contrasena-root
                         -   name:   MARIADB_DATABASE
                             valueFrom:  
                                 configMapKeyRef:    
-                                    name:   configuracion-mariadb
+                                    name:   {{ include "configmap.name" . }}
                                     key:    nombre_bbdd
                         -   name:   MARIADB_USER
                             valueFrom:  
                                 secretKeyRef:    
-                                    name:   configuracion-mariadb-secret
+                                    name:   {{ include "secret.name" . }}
                                     key:    usuario     
                         -   name:   MARIADB_PASSWORD
                             valueFrom:  
                                 secretKeyRef:    
-                                    name:   configuracion-mariadb-secret
+                                    name:   {{ include "secret.name" . }}
                                     key:    contrasena-usuario
                     volumeMounts:
-                        - name:         datos-bbdd
-                          mountPath:   /var/lib/mysql
+                        - name:         {{ include "db.volume.name" . }}
+                          mountPath:    /var/lib/mysql
             volumes:
-                - name: datos-bbdd
+                - name: {{ include "db.volume.name" . }}
                   persistentVolumeClaim: 
-                    claimName: peticion-volumen-mariadb
+                    claimName: {{ include "db.pvc.name" . }}

@@ -2,7 +2,7 @@
 kind:           ConfigMap
 apiVersion:     v1
 metadata:
-    name:       configuracion-mariadb
+    name:       {{ include "configmap.name" . }}
 
 data:
     nombre_bbdd:    {{ default "wp-db" .Values.mariadb.config.dbName | trim | lower | quote }}
