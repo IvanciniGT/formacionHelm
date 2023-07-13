@@ -1,60 +1,60 @@
 wordpress:
-  replicas: 1
-  image:      
-    repo: wordpress   
-    tag: latest # Nulo. Eso es YAML
-    pullPolicy: Always
-  resources:
-    requests: # Esto se usa por el planificador en primera instancia. Para determinar a qué máquina se asigna el pod (scheduler)
-        cpu:  1
-        memory: 1Gi
-    limits:
-        cpu:  1
-        memory: 1Gi 
-  persistence:
-    enabled: true
-    existing-pvc-name: ~
-    capacity: ~
-    storageClass: ~
-  ingress:
-    domain: ~  # Este sería el unico obligatorio para que un despliegue pueda realziarse y hacer una prueba de concepto
-    tls: false
-  autoscale:
-    enabled: false
-    min: ~
-    max: ~
-    cpu: ~
-    memory: ~
-  
+    replicas: 1
+    image:            
+        repo: wordpress     
+        tag: latest # Nulo. Eso es YAML
+        pullPolicy: Always
+    resources:
+        requests: # Esto se usa por el planificador en primera instancia. Para determinar a qué máquina se asigna el pod (scheduler)
+                cpu:    1
+                memory: 1Gi
+        limits:
+                cpu:    1
+                memory: 1Gi 
+    persistence:
+        enabled: true
+        existingPvcName: ~
+        capacity: 1Gi
+        storageClass: ~
+    ingress:
+        domain: ~    # Este sería el unico obligatorio para que un despliegue pueda realziarse y hacer una prueba de concepto
+        tls: false
+    autoscale:
+        enabled: false
+        min: ~
+        max: ~
+        cpu: ~
+        memory: ~
+    
 mariadb: 
-  serviceName: ~
-  image:      
-    repo: mariadb  
-    tag: latest
-    pullPolicy: Always
-  resources:
-    requests: # Esto se usa por el planificador en primera instancia. Para determinar a qué máquina se asigna el pod (scheduler)
-        cpu:  1
-        memory: 1Gi
-    limits:
-        cpu:  1
-        memory: 1Gi
-  persistence:
-    enabled: false
-    existing-pvc-name: ~
-    capacity: ~
-    storageClass: ~
-  config:
-    dbName: "WORDPRESS "
-    existingSecretName: ~
-    user: ~
-    password: ~ # Aleatorio
-    rootPassword: ~ # Aleatorio
-    customConfigFile: |
-      Esta es la linea 1 del fichero de mysql
-      Y esta es la linea 2
-      Y esta es la 3
-      
-      
-      
-      
+    serviceName: ~
+    image:            
+        repo: mariadb    
+        tag: latest
+        pullPolicy: Always
+    resources:
+        requests: # Esto se usa por el planificador en primera instancia. Para determinar a qué máquina se asigna el pod (scheduler)
+                cpu:    1
+                memory: 1Gi
+        limits:
+                cpu:    1
+                memory: 1Gi
+    persistence:
+        enabled: true
+        existingPvcName: ~
+        capacity: 1Gi #Gi Mi Ti Ki
+        storageClass: ~
+    config:
+        dbName: "WORDPRESS "
+        existingSecretName: ~
+        user: ~
+        password: ~ # Aleatorio
+        rootPassword: ~ # Aleatorio
+        customConfigFile: |+
+            Esta es la linea 1 del fichero de mysql
+            Y esta es la linea 2
+            Y esta es la 3
+            
+            
+            
+            

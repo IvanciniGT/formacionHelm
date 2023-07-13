@@ -5,5 +5,5 @@ metadata:
     name:       configuracion-mariadb
 
 data:
-    nombre_bbdd:    {{ .Values.mariadb.config.dbName | trim | lower | quote }}
+    nombre_bbdd:    {{ default "wp-db" .Values.mariadb.config.dbName | trim | lower | quote }}
                     # Listado de filtros disponibles: https://helm.sh/docs/chart_template_guide/function_list/

@@ -1,0 +1,53 @@
+kind:           Deployment
+apiVersion:     apps/v1
+metadata:
+    name:       deployment-bbdd
+
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app:    mariadb
+    template:
+        metadata:
+            labels:
+                app:    mariadb
+        spec:
+            containers:
+                -   name:   contenedor1 
+                    image:  mariadb:latest 
+                    imagePullPolicy: IfNotPresent
+                    resources:
+                        requests: 
+                        cpu:    500m
+                            memory: 1Gi
+                        limits:
+                            cpu:    8
+                            memory: 1Gi
+                    env:
+                        -   name:   MARIADB_ROOT_PASSWORD
+                            valueFrom:  
+                                secretKeyRef:    
+                                    name:   configuracion-mariadb-secret
+                                    key:    contraseña-root
+                        -   name:   MARIADB_DATABASE
+                            valueFrom:  
+                                configMapKeyRef:    
+                                    name:   configuracion-mariadb
+                                    key:    nombre_bbdd
+                        -   name:   MARIADB_USER
+                            valueFrom:  
+                                secretKeyRef:    
+                                    name:   configuracion-mariadb-secret
+                                    key:    usuario     
+                        -   name:   MARIADB_PASSWORD
+                            valueFrom:  
+                                secretKeyRef:    
+                                    name:   configuracion-mariadb-secret
+                                    key:    contraseña-usuario
+                    volumeMounts:
+                        - name:         datos-bbdd
+                          mountPath:   /var/lib/mysql
+            volumes:
+                - name: datos-bbdd
+                  persistentVolumeClaim: peticion-volumen-mariadb

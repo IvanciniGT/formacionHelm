@@ -1,0 +1,23 @@
+---
+{{ if (and (.Values.wordpress.persistence.enabled) (not .Values.wordpress.persistence.existingPvcName)) }}
+
+{{ if not (regexMatch "^[1-9][0-9]*[GMTK]i$" 
+    ( required "Debe especificar el tamño del volumen del Wordpress: 'wordpress.persistence.capacity'"  .Values.wordpress.persistence.capacity )
+) }}
+    {{ fail (printf "El valor suministrador para la capacidad: '%s' no es válido. Ejemplos de valores válidos: 1Gi, 16Ti, 9Mi" .Values.wordpress.persistence.capacity) }}
+{{ end }}
+
+kind:           PersistentVolumeClaim
+apiVersion:     v1
+metadata:
+    name:       peticion-volumen-wordpress
+spec:
+    resources:
+        requests:
+            storage: {{ .Values.wordpress.persistence.capacity }}
+    {{- if .Values.wordpress.persistence.storageClass }}
+    storageClassName: {{ .Values.wordpress.persistence.storageClass -}}
+    {{ end }}
+    accessModes:
+        - ReadWriteOncePod
+{{ end }}
