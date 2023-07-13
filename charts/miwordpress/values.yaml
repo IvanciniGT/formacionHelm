@@ -7,10 +7,10 @@ wordpress:
     resources:
         requests: # Esto se usa por el planificador en primera instancia. Para determinar a qué máquina se asigna el pod (scheduler)
                 cpu:    1
-                memory: 1Gi
+                memory: 1 Gi
         limits:
                 cpu:    1
-                memory: 1Gi 
+                memory: ~
     persistence:
         enabled: true
         existingPvcName: ~
@@ -35,10 +35,10 @@ mariadb:
     resources:
         requests: # Esto se usa por el planificador en primera instancia. Para determinar a qué máquina se asigna el pod (scheduler)
                 cpu:    1
-                memory: 1Gi
+                memory: 3Gi
         limits:
-                cpu:    1
-                memory: 1Gi
+                cpu:    200m
+                memory: 3Gi
     persistence:
         enabled: true
         existingPvcName: ~

@@ -15,26 +15,8 @@ spec:
         spec:
             containers:
                 -   name:   contenedor1 
-                    {{ with .Values.mariadb.image -}}
-{{- /* *************************************************************************************** 
-    Aqui validamos la variable pullPolicy, a la que por defecto asignamos el valor ALWAYS
-******************************************************************************************** */ -}}                    
-{{ $pullPolicyRellena := default "Always" .pullPolicy }}
-{{- if not (regexMatch "^((IfNotPresent)|(Always)|(Never))$" $pullPolicyRellena ) }}
-    {{ fail (printf "El valor suministrador para la propiedad mariadb.image.pullpolicy: '%s' no es válido. Debe debe tener como valor: Always, IfnotPresent o Never." .pullPolicy) }}
-{{ end -}}
-
-                    image:  {{ required "Debe suministrar el repo de la imagen de mariadb: mariadb.image.repo" .repo -}}
-                            :{{ required "Debe suministrar el tag de la imagen de mariadb: mariadb.image.tag" .tag }}
-                    imagePullPolicy: {{ $pullPolicyRellena }}
-                    {{- end }}
-                    resources:
-                        requests: 
-                            cpu:    500m
-                            memory: 1Gi
-                        limits:
-                            cpu:    8
-                            memory: 1Gi
+                    {{- include "image" .Values.mariadb.image | nindent 20 -}}
+                    {{- include "resources" .Values.mariadb.resources | nindent 20 }}
                     env:
                         -   name:   MARIADB_ROOT_PASSWORD
                             valueFrom:  

@@ -1,0 +1,17 @@
+---
+{{/*
+kind:           ConfigMap
+apiVersion:     v1
+metadata:
+    name:       prueba
+
+data:
+    prueba:
+        {{ . | toYaml | nindent 8}}
+    prueba2:
+        {{ $otroDiccionario := dict "clave1" "valor1" "clave2" "valor2" }}
+        {{ $otroDiccionario | toYaml | nindent 8}}
+    prueba3: {{ $otroDiccionario.clave1 }}
+    prueba3: {{ .Values.mariadb.persistence.enabled }}
+    
+*/}}
