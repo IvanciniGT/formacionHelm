@@ -1,0 +1,33 @@
+
+
+# Master (3) y tendrán un balanceador de carga
+
+# Serán 3 pods, definidos a través de un StatefulSet
+# (ya que cada pod, tendrá y debe tener su propio volumen de almacenamiento de datos independiente)
+
+# Y el balanceador lo definiría como un Service CLUSTERIP (IP de balanceo + entrada en DNS interno de kub)
+                                <<<<<<<<<<
+maestros:                   
+    replicas: 2
+    resources:
+    service:                            
+        name: elastic-master
+        port: 9300
+    
+datas:
+    replicas: 5
+    resources:
+    env:
+    
+coordinadores: # Que son los que expongo
+    replicas: 2
+    resources:
+    env:                                <<<<<<<<<
+
+ingest: # Quizás también los expongo... si los tengo
+    replicas: 0
+    resources:
+    env:
+
+# Al procesar la env del statefulset que generamos para cada tipo
+# seed.hosts=elastic-master-1.elastic-master:9300,elastic-master-2.elastic-master:9300   # urls de los maestros

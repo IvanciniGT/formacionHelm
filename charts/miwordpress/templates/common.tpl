@@ -45,7 +45,7 @@ required: true
 
 {{- define "check.bytes" -}}
 {{- if and (.required) (not .value) -}}
-{{- fail (printf "Error en la propiedad '%s'. Es obligatorio suministrar un valor" .field) -}}
+{{- fail (printf "Error en la propiedad '%s'. Es obligatorio suministrar un valor" $.field) -}}
 {{- end -}}
 {{- if not (regexMatch "^[1-9][0-9]*[GMTK]i$" .value) -}}
 {{- fail (printf "Error en la propiedad '%s'. El valor suministrado '%s' no es válido. Ejemplos de valores válidos: 1Gi, 16Ti, 9Mi" .field .value) -}}
@@ -66,11 +66,25 @@ required: true
 {{- end -}}
 {{- end -}}
 
-{{- define "resources" -}}
-{{- include "check.bytes" ( dict "required" true "field" "????.resources.requests.memory" "value" .requests.memory ) -}}
-{{- include "check.bytes" ( dict "required" true "field" "????.resources.limits.memory" "value" .limits.memory ) -}}
 
-{{- include "check.cores" ( required "Debe especificar un valor para la cpu del requests" .requests.cpu ) -}}
-{{- include "check.cores" ( required "Debe especificar un valor para la cpu del limits" .limits.cpu ) -}}
-resources: {{ toYaml . | nindent 4}}
+
+
+
+
+{{- define "resources" -}}
+
+{{- $nombreCampoRequestsMemory := printf "%s.resources.requests.memory" .field -}}
+{{- $nombreCampoLimitsMemory := printf "%s.resources.limits.memory" .field -}}
+{{- $mensajeErrorCampoRequestsCPU := printf "Debe especificar un valor para la propiedad  %s.resources.requests.cpu" .field -}}
+{{- $mensajeErrorCampoLimitsCPU := printf "Debe especificar un valor para la propiedad %s.resources.limits.cpu" .field -}}
+
+{{- include "check.bytes" ( dict "required" true "field" $nombreCampoRequestsMemory "value" .requests.memory ) -}}
+{{- include "check.bytes" ( dict "required" true "field" $nombreCampoLimitsMemory "value" .limits.memory ) -}}
+
+{{- include "check.cores" ( required $mensajeErrorCampoRequestsCPU .requests.cpu ) -}}
+{{- include "check.cores" ( required $mensajeErrorCampoLimitsCPU .limits.cpu ) -}}
+
+resources: 
+    requests: {{ toYaml .requests | nindent 8}}
+    limits: {{ toYaml .limits | nindent 8}}
 {{- end -}}
