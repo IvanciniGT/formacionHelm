@@ -57,7 +57,7 @@ mariadb:
         extraEnvVars:
             clave1: valor1
             clave2: 33
-            MARIADB_USER: federico
+            #MARIADB_USER: federico
             #- name: clave1
             #  value: valor1
             #- name: clave2
