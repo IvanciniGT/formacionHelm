@@ -54,6 +54,16 @@ mariadb:
             Esta es la linea 1 del fichero de mysql
             Y esta es la linea 2
             Y esta es la 3
+        extraEnvVars:
+            clave1: valor1
+            clave2: 33
+            MARIADB_USER: federico
+            #- name: clave1
+            #  value: valor1
+            #- name: clave2
+            #  value: 33
+            #- name: MARIADB_USER
+            #  value: federico
             
             
             

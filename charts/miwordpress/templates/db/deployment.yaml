@@ -38,6 +38,12 @@ spec:
                                 secretKeyRef:    
                                     name:   {{ include "secret.name" . }}
                                     key:    contrasena-usuario
+# Necesitamos montar un bucle sobre el que ir iterando
+{{ range $clave, $valor := .Values.mariadb.config.extraEnvVars }}
+                        -   name: {{ $clave }}
+                            value: {{ $valor }}
+{{ end }}                        
+                        
                     volumeMounts:
                         - name:         {{ include "db.volume.name" . }}
                           mountPath:    /var/lib/mysql
