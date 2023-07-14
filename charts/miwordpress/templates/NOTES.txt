@@ -1,0 +1,32 @@
+Lo que pongamos aquí se va a mostrar cuando se haga un despliegue
+Tal y como aquí lo escriba...
+Lo escriba bien
+O lo escriba mal
+
+Hemos creado un servicio para poder acceder a la base de datos.
+
+    Servicio: {{ default "wp-db" .Values.mariadb.serviceName | trim | quote }}
+    
+También hemos creaqdo 2 pvc:
+
+    PVC para la BBDD:  {{ include "db.pvc.name" $ }}
+    PVC para la BBDD:  peticion-volumen-wordpress
+    
+Asegúrate que tienen vinculado un pv, ejecutando los comandos:
+
+    $ kubectl get pvc -n {{ .Release.Namespace }}
+
+{{ if not .Values.mariadb.config.existingSecretName -}}
+Hemos generado una contraseña para el usuario de la base de datos.
+Para obtenerla, ejecuta:
+
+    $ kubectl get secret {{ include "secret.name" . }} -n {{ .Release.Namespace }} -o jsonpath={.data.contrasena-usuario} | base64 --decode
+{{- else -}}    
+Recuerda que estamos usando el secreto que has provisto para la contraseña del usuario de la BBDD.
+Puede ver la contraseña con el comando:
+
+    $ kubectl get secret {{ .Values.mariadb.config.existingSecretName }} -n {{ .Release.Namespace }} -o jsonpath={.data.contrasena-usuario} | base64 --decode
+
+{{- end }}
+
+GRacias por participar !!! :)

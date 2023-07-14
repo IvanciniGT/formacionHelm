@@ -34,10 +34,10 @@ mariadb:
         pullPolicy: IfNotPresent
     resources:
         requests: # Esto se usa por el planificador en primera instancia. Para determinar a qué máquina se asigna el pod (scheduler)
-                cpu:    1
+                cpu:    100m
                 memory: 3Gi
         limits:
-                cpu:    200m
+                cpu:    2
                 memory: 3Gi
     persistence:
         enabled: true
@@ -46,7 +46,7 @@ mariadb:
         storageClass: ~
     config:
         dbName: "WORDPRESS "
-        existingSecretName: federico
+        existingSecretName: "mi-secreto"
         user: ~
         password: ~ # Aleatorio
         rootPassword: ~ # Aleatorio
