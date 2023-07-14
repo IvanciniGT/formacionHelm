@@ -252,3 +252,17 @@ En v2:
             value: 3Gb
             field: "mariadb"
 
+---
+
+CONTEXTO:
+vars: .Values.mariadb.config.extraEnvVars
+forbiddenVars: $variablesNoPermitidas
+
+---
+    {{- if hasKey $.forbiddenVars $clave -}}
+     {{- fail (printf "No puede definir la variable %s como extraEnvVars. En su lugar utilice: %s" $clave (get .forbiddenVars $clave ) ) -}}
+    {{- end }}
+
+
+{{- $contextoExtraEnvVars := dict "vars" .Values.mariadb.config.extraEnvVars "forbiddenVars" $variablesNoPermitidas -}}
+                        {{- include "extra.env.vars" $contextoExtraEnvVars | nindent 24 }}

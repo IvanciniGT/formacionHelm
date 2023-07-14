@@ -38,20 +38,13 @@ spec:
                                 secretKeyRef:    
                                     name:   {{ include "secret.name" . }}
                                     key:    contrasena-usuario
-# Llevar a una plantilla... y contar en qué campo habría que meter el valor correspondiente a las variables prohibidas
-{{/*- $variablesNoPermitidas := list "MARIADB_ROOT_PASSWORD" "MARIADB_DATABASE" "MARIADB_USER" "MARIADB_PASSWORD" */-}}
+{{/*- $variablesNoPermitidas := list "MARIADB_ROOT_PASSWORD" "MARIADB_DATABASE" "MARIADB_USER" "MARIADB_PASSWORD" -*/}}
 {{- $variablesNoPermitidas := dict "MARIADB_ROOT_PASSWORD" "mariadb.config.rootPassword" -}}
-{{ $_ := set $variablesNoPermitidas "MARIADB_DATABASE" "mariadb.config.dbName" }}
-{{ $_ := set $variablesNoPermitidas "MARIADB_USER" "mariadb.config.user" }}
-{{ $_ := set $variablesNoPermitidas "MARIADB_PASSWORD" "mariadb.config.password" }}
-
-{{- range $clave, $valor := .Values.mariadb.config.extraEnvVars -}}
-    {{- if hasKey $clave $variablesNoPermitidas -}}
-     {{- fail (printf "No puede definir la variable %s como extraEnvVars. En su lugar utilice: %s" $clave (get $variablesNoPermitidas $clave ) ) -}}
-    {{- end }}
-                        -   name: {{ $clave }}
-                            value: {{ $valor | quote}}
-{{- end }}                        
+{{- $_ := set $variablesNoPermitidas "MARIADB_DATABASE" "mariadb.config.dbName" -}}
+{{- $_ := set $variablesNoPermitidas "MARIADB_USER" "mariadb.config.user" -}}
+{{- $_ := set $variablesNoPermitidas "MARIADB_PASSWORD" "mariadb.config.password" -}}
+{{- $contextoExtraEnvVars := dict "vars" .Values.mariadb.config.extraEnvVars "forbiddenVars" $variablesNoPermitidas }}
+                        {{ include "extra.env.vars" $contextoExtraEnvVars | nindent 24 | trim }}
                     volumeMounts:
                         - name:         {{ include "db.volume.name" . }}
                           mountPath:    /var/lib/mysql

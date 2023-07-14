@@ -88,3 +88,15 @@ resources:
     requests: {{ toYaml .requests | nindent 8}}
     limits: {{ toYaml .limits | nindent 8}}
 {{- end -}}
+
+
+{{- define "extra.env.vars" -}}
+{{- $forbiddenVars := .forbiddenVars -}}
+{{- range $clave, $valor := .vars -}}
+{{- if hasKey $forbiddenVars $clave -}}
+ {{- fail (printf "No puede definir la variable %s como extraEnvVars. En su lugar utilice: %s" $clave (get $forbiddenVars $clave ) ) -}}
+{{- end -}}
+-   name: {{ $clave }}
+    value: {{ $valor | quote}}
+{{ end -}}                        
+{{- end -}}
