@@ -8,7 +8,7 @@
 kind:           PersistentVolumeClaim
 apiVersion:     v1
 metadata:
-    name:       {{ include "db.pvc.name" $ }}
+    name:       {{.Release.Name}}-{{ include "db.pvc.name" $ }}
 spec:
     resources:
         requests:
